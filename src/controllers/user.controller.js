@@ -1,5 +1,4 @@
 import { User } from "../models/user.model.js";
-import { generateToken } from "../utills/tokenService.js";
 import cookieParser from "cookie-parser";
 
 const registerUser = async (req, res) => {
@@ -28,6 +27,12 @@ const registerUser = async (req, res) => {
   }
 };
 
+const cookieOption = {
+  maxAge: 24 * 60 * 60 * 1000,
+  httpOnly: true,
+  secure: process.env.cookie_secure === "production",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+};
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -45,7 +50,6 @@ const loginUser = async (req, res) => {
       });
     }
 
-    const userID = user?._id;
     const checkPassword = await user.isPasswordCorrect(password);
     if (!checkPassword) {
       return res.status(400).json({
@@ -53,15 +57,8 @@ const loginUser = async (req, res) => {
         message: "Invalid password",
       });
     }
-
-    const token = generateToken(userID);
-    res.cookie("userToken", token, {
-      maxAge: 24 * 60 * 60 * 1000,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict",
-      // path: "/",
-    });
+    const token = user.generateToken();
+    res.cookie("userToken", token, cookieOption);
     return res.status(200).json({
       success: true,
       message: "User logged in successfully",
@@ -76,21 +73,33 @@ const loginUser = async (req, res) => {
   }
 };
 
-const getUserById = async (req, res) => {
+const logoutUser = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    console.log(id);
-    const user = await User.findById(id);
-    if (!user) {
+    if (!req.cookies.userToken) {
       return res.status(400).json({
         success: false,
-        message: "user not found",
+        message: "User is not logged in!",
       });
     }
-    return res.status(400).json({
+    res.clearCookie("userToken", cookieOption);
+    return res
+      .status(200)
+      .json({ success: true, message: "Logout successfully!" });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error,
+    });
+  }
+};
+
+const getUserById = async (req, res) => {
+  try {
+    const { user } = req;
+    return res.status(200).json({
       success: true,
-      message: "user data fetched successfully",
+      message: "user data fetched successfully!",
       user,
     });
   } catch (error) {
@@ -108,13 +117,11 @@ const getAllUsers = async (req, res) => {
     if (!users) {
       return res.status(400).json({ success: false, message: "No user found" });
     }
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "All user data fetched successfully",
-        users,
-      });
+    return res.status(200).json({
+      success: true,
+      message: "All user data fetched successfully",
+      users,
+    });
   } catch (error) {
     return res
       .status(400)
@@ -122,4 +129,4 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-export { registerUser, loginUser, getUserById,getAllUsers };
+export { registerUser, loginUser, logoutUser, getUserById, getAllUsers };
