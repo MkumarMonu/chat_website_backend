@@ -32,6 +32,8 @@ const cookieOption = {
   secure: process.env.cookie_secure === "production",
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
+
+console.log("cookie secure", cookieOption.secure);
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
