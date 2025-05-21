@@ -27,11 +27,13 @@ const registerUser = async (req, res) => {
   }
 };
 
+const isProd = process.env.NODE_ENV === "production";
+
 const cookieOption = {
   httpOnly: true,
-  secure: process.env.cookie_secure === "production",
+  secure: isProd,
+  sameSite: isProd ? "none" : "lax",
   maxAge: 7 * 24 * 60 * 60 * 1000,
-  sameSite: "none",
 };
 
 console.log("cookie secure", cookieOption.secure);
