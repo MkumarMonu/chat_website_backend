@@ -2,17 +2,17 @@ import mongoose from "mongoose";
 
 const connectionSchema = mongoose.Schema(
   {
-    from: {
+    fromUser: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    to: {
+    toUser: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
     status: {
       type: String,
-      enum: ["sent", "connected", "rejected"],
+      enum: ["ignored", "interested", "accepted", "rejected"],
     },
   },
   { timestamps: true }
