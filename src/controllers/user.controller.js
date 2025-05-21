@@ -28,7 +28,6 @@ const registerUser = async (req, res) => {
 };
 
 const cookieOption = {
-  maxAge: 24 * 60 * 60 * 1000,
   httpOnly: true,
   secure: process.env.cookie_secure === "production",
   maxAge: 7 * 24 * 60 * 60 * 1000,
