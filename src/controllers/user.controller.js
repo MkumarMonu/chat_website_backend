@@ -31,6 +31,7 @@ const cookieOption = {
   httpOnly: true,
   secure: process.env.cookie_secure === "production",
   maxAge: 7 * 24 * 60 * 60 * 1000,
+  sameSite: "none",
 };
 
 console.log("cookie secure", cookieOption.secure);
