@@ -6,9 +6,7 @@ const authenticateUser = async (req, res, next) => {
     const token =
       req.headers.authorization?.split(" ")[1] || req.cookies.userToken;
     if (!token) {
-      return res
-        .status(401)
-        .json({ success: false, message: "You are not authorized!" });
+      return res.status(401).json({ success: false, message: "Please Login!" });
     }
 
     const decodedData = jwt.verify(token, process.env.JWT_SECRET);

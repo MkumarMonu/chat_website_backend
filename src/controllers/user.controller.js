@@ -36,7 +36,6 @@ const cookieOption = {
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
-console.log("cookie secure", cookieOption.secure);
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -117,7 +116,8 @@ const getUserById = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find();
+    const currentUserId = req.user?._id;
+    const users = await User.find({ _id: { $ne: currentUserId } });
     if (!users) {
       return res.status(400).json({ success: false, message: "No user found" });
     }

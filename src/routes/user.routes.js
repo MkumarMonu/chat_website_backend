@@ -14,6 +14,6 @@ userRouter.route("/register").post(registerUser);
 userRouter.route("/login").post(loginUser);
 userRouter.route("/logout").post(logoutUser);
 userRouter.route("/getUser").get(authenticateUser, getUserById);
-userRouter.route("/getAllUser").get(getAllUsers);
+userRouter.route("/getAllUser").get(authenticateUser, getAllUsers);
 
 export { userRouter };

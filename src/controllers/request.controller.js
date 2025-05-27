@@ -61,15 +61,29 @@ const sendRequest = async (req, res) => {
   }
 };
 
-const reviewRequest = async (req, res) =>{
+const reviewRequest = async (req, res) => {
   try {
-    
+    const loggedInUserId = req.user._id;
+    const fetchRequest = await connections
+      .find({ toUser: loggedInUserId })
+      .populate({ path: "toUser", select: "username email" });
+    if (!fetchRequest) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No request found" });
+    }
+    return res.status(200).json({
+      success: true,
+      message: "Request found",
+      requests: fetchRequest,
+    });
   } catch (error) {
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
-    })
+      error,
+    });
   }
-}
+};
 
-export { sendRequest,reviewRequest };
+export { sendRequest, reviewRequest };
