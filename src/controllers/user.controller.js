@@ -1,3 +1,4 @@
+import connections from "../models/connection.model.js";
 import { User } from "../models/user.model.js";
 import cookieParser from "cookie-parser";
 
@@ -116,8 +117,38 @@ const getUserById = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
   try {
+    // the user will not see the data
+    // user who are already in his connection
+    // logged in user himself
+    //
+    //  here first take all the data from the connection collection which we do not to show to the logged in user
+    //  after that take all the user data from the user collection and from the user data remove all the data
+    //  which we do not to show to the logged in user which we have find from the connection collection
+    const limit = parseInt(req.params.limit) || 10;
+    const page = parseInt(req.params.page) || 1;
+    const skip = (page - 1) * limit;
     const currentUserId = req.user?._id;
-    const users = await User.find({ _id: { $ne: currentUserId } });
+    const connectionRequests = await connections
+      .find({
+        $or: [{ fromUser: currentUserId }, { toUser: currentUserId }],
+      })
+      .select("fromUser toUser");
+    const hideUserFromHome = new Set();
+    connectionRequests.forEach((request) => {
+      hideUserFromHome.add(request.fromUser.toString());
+      hideUserFromHome.add(request.toUser.toString());
+    });
+
+    const users = await User.find({
+      $and: [
+        { _id: { $nin: Array.from(hideUserFromHome) } },
+        { _id: { $ne: currentUserId } },
+      ],
+    })
+      .select("username email phone avatar")
+      .skip(skip)
+      .limit(limit);
+
     if (!users) {
       return res.status(400).json({ success: false, message: "No user found" });
     }
