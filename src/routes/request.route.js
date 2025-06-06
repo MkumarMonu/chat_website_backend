@@ -1,7 +1,8 @@
 import express from "express";
 import { authenticateUser } from "../middlewares/authenticateUser.js";
 import {
-  reviewRequest,
+  acceptOrRejectRequest,
+  getAllRequest,
   sendRequest,
 } from "../controllers/request.controller.js";
 
@@ -12,10 +13,11 @@ requestRouter
   .post(authenticateUser, sendRequest);
 
 requestRouter
-  .route("review/request/:status/:toUserId")
-  .post(authenticateUser, reviewRequest);
-requestRouter
   .route("/review/getAllRequest")
-  .get(authenticateUser, reviewRequest);
+  .get(authenticateUser, getAllRequest);
+
+requestRouter
+  .route("/acceptOrRejectRequest/:status/:requestId")
+  .post(authenticateUser, acceptOrRejectRequest);
 
 export default requestRouter;

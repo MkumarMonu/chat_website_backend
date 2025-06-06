@@ -61,11 +61,12 @@ const sendRequest = async (req, res) => {
   }
 };
 
-const reviewRequest = async (req, res) => {
+const getAllRequest = async (req, res) => {
   try {
     const loggedInUserId = req.user._id;
     const fetchRequest = await connections
-      .find({ toUser: loggedInUserId })
+      .find({ toUser: loggedInUserId,status:"interested" })
+      .populate({ path: "fromUser", select: "username email" })
       .populate({ path: "toUser", select: "username email" });
     if (!fetchRequest) {
       return res
@@ -74,7 +75,7 @@ const reviewRequest = async (req, res) => {
     }
     return res.status(200).json({
       success: true,
-      message: "Request found",
+      message: "Your all request fetched successfully!",
       requests: fetchRequest,
     });
   } catch (error) {
@@ -86,4 +87,33 @@ const reviewRequest = async (req, res) => {
   }
 };
 
-export { sendRequest, reviewRequest };
+const acceptOrRejectRequest = async (req, res) => {
+  try {
+    const loggedInUserId = req.user._id;
+    const requestId = req.params.requestId;
+
+    // Find the request by ID
+    const existingConnection = await connections.findOne({_id:requestId,toUser:loggedInUserId,status:"interested"});
+    if (!existingConnection) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No request found" });
+    }
+
+    // Update the status
+    existingConnection.status = "accepted";
+    const updatedConnection = await existingConnection.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "You have successfully accepted the request!",
+      updatedConnection,
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error", error });
+  }
+};
+
+export { sendRequest, getAllRequest, acceptOrRejectRequest };
