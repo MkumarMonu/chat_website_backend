@@ -1,5 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
+import http from "http";
+import { Server } from "socket.io";
 import cors from "cors";
 import { connectToDb } from "./config/db.js";
 import { userRouter } from "./src/routes/user.routes.js";
@@ -8,10 +10,28 @@ import requestRouter from "./src/routes/request.route.js";
 
 dotenv.config();
 const app = express();
+const server = http.createServer(app);
+// app.use(
+//   cors({
+//     origin: "http://localhost:5173",
+//     origin:"https://chat-website-mv79.vercel.app/",
+//     credentials: true,
+//   })
+// );
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://chat-website-mv79.vercel.app"
+];
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
-    origin:"https://chat-website-mv79.vercel.app/",
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
