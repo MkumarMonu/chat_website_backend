@@ -5,7 +5,6 @@ import { connectToDb } from "./config/db.js";
 import { userRouter } from "./src/routes/user.routes.js";
 import cookieParser from "cookie-parser";
 import requestRouter from "./src/routes/request.route.js";
-import { connectionRouter } from "./src/routes/connection.route.js";
 
 dotenv.config();
 const app = express();
@@ -21,7 +20,6 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(cookieParser());
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/send", requestRouter);
-app.use("/api/v1/connection", connectionRouter);
 app.get("/", (req, res) => {
   res.send("Hello, World!");
 });

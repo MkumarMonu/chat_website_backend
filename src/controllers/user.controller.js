@@ -164,4 +164,51 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-export { registerUser, loginUser, logoutUser, getUserById, getAllUsers };
+const getYourConnections = async (req, res) => {
+  try {
+    const loggedInUserId = req.user.id;
+    const getConnections = await connections
+      .find({
+        $or: [
+          {
+            fromUser: loggedInUserId,
+            status: "accepted",
+          },
+          { toUser: loggedInUserId, status: "accepted" },
+        ],
+      })
+      .populate({ path: "fromUser", select: "username email" })
+      .populate({ path: "toUser", select: "username email" });
+    const data = getConnections.map((row) => {
+      if (row.fromUser?._id.toString() === loggedInUserId.toString()) {
+        return row?.toUser;
+      }
+      return row?.fromUser;
+    });
+    if (!getConnections) {
+      return res
+        .status(404)
+        .json({ success: false, message: "No connections found" });
+    }
+    return res.status(200).json({
+      success: true,
+      message: "Your all connections fetched successfully!",
+      data: data,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  getUserById,
+  getAllUsers,
+  getYourConnections,
+};

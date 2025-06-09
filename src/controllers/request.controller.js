@@ -63,9 +63,9 @@ const sendRequest = async (req, res) => {
 
 const getAllRequest = async (req, res) => {
   try {
-    const loggedInUserId = req.user._id;
+    const loggedInUserId = req.user?._id;
     const fetchRequest = await connections
-      .find({ toUser: loggedInUserId,status:"interested" })
+      .find({ toUser: loggedInUserId, status: "interested" })
       .populate({ path: "fromUser", select: "username email" })
       .populate({ path: "toUser", select: "username email" });
     if (!fetchRequest) {
@@ -93,7 +93,11 @@ const acceptOrRejectRequest = async (req, res) => {
     const requestId = req.params.requestId;
 
     // Find the request by ID
-    const existingConnection = await connections.findOne({_id:requestId,toUser:loggedInUserId,status:"interested"});
+    const existingConnection = await connections.findOne({
+      _id: requestId,
+      toUser: loggedInUserId,
+      status: "interested",
+    });
     if (!existingConnection) {
       return res
         .status(400)
