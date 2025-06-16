@@ -91,7 +91,10 @@ io.on("connection", (socket) => {
 
         await chat.save();
 
-        io.to(uniqueRoomId).emit("messageRecieved", { message });
+        io.to(uniqueRoomId).emit("messageRecieved", {
+          message,
+          senderId: userId,
+        });
       } catch (error) {
         console.log(error);
       }
