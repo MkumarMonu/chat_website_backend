@@ -62,24 +62,22 @@ io.on("connection", (socket) => {
   socket.on("joinChat", async (senderName, userId, targetUserId) => {
     const uniqueRoomId = [userId, targetUserId].sort().join("$");
 
-    console.log(uniqueRoomId, "unique room id for join chat message");
+    // console.log(
+    //   uniqueRoomId,
+    //   "unique room id for join chat message and sender name is :",
+    //   senderName
+    // );
     socket.join(uniqueRoomId);
   });
 
   socket.on(
     "sendMessage",
     async (senderName, userId, message, targetUserId) => {
-      console.log("sender name :", senderName, userId, message, targetUserId);
+      // console.log("sender name :", senderName, userId, message, targetUserId);
       try {
         const uniqueRoomId = [userId, targetUserId].sort().join("$");
-        // const chat = await Chat.findOne({
-        //   participants: { $or: [userId, targetUserId] },
-        // });
         let chat = await Chat.findOne({
-          $or: [
-            { participants: [userId, targetUserId] },
-            { participants: [targetUserId, userId] },
-          ],
+          participants: { $all: [userId, targetUserId] },
         });
         if (!chat) {
           chat = new Chat({
@@ -94,6 +92,7 @@ io.on("connection", (socket) => {
         io.to(uniqueRoomId).emit("messageRecieved", {
           message,
           senderId: userId,
+          senderName,
         });
       } catch (error) {
         console.log(error);
