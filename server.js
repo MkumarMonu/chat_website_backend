@@ -22,6 +22,7 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:5173",
   "https://chat-website-mv79.vercel.app",
+  "https://chat-website-woad.vercel.app/",
 ];
 
 app.use(

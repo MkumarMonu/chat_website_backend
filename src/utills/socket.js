@@ -4,6 +4,7 @@ import { Chat } from "../models/chat.model.js";
 const allowedOrigins = [
   "http://localhost:5173",
   "https://chat-website-mv79.vercel.app",
+  "https://chat-website-woad.vercel.app/",
 ];
 
 export const initilizeSocketServer = (server) => {
