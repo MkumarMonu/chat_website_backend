@@ -6,6 +6,8 @@ import { connectToDb } from "./config/db.js";
 import { userRouter } from "./src/routes/user.routes.js";
 import cookieParser from "cookie-parser";
 import requestRouter from "./src/routes/request.route.js";
+import { initilizeSocketServer } from "./src/utills/socket.js";
+import { chatRouter } from "./src/routes/chat.route.js";
 
 dotenv.config();
 const app = express();
@@ -40,67 +42,15 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(cookieParser());
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/send", requestRouter);
-import { Chat } from "./src/models/chat.model.js";
+app.use("/api/v1/chat", chatRouter);
+
 app.get("/", (req, res) => {
   res.send("Hello, World!");
 });
-import { Server } from "socket.io";
+
 const server = http.createServer(app);
+initilizeSocketServer(server);
 
-const io = new Server(server, {
-  cors: {
-    origin: allowedOrigins,
-    methods: ["GET", "POST", "DELETE", "PUT"],
-  },
-});
-
-io.on("connection", (socket) => {
-  console.log("successfully connected :");
-  socket.onAny((event, ...args) => {
-    console.log(`🔥 Event received: ${event}`, args);
-  });
-  socket.on("joinChat", async (senderName, userId, targetUserId) => {
-    const uniqueRoomId = [userId, targetUserId].sort().join("$");
-
-    // console.log(
-    //   uniqueRoomId,
-    //   "unique room id for join chat message and sender name is :",
-    //   senderName
-    // );
-    socket.join(uniqueRoomId);
-  });
-
-  socket.on(
-    "sendMessage",
-    async (senderName, userId, message, targetUserId) => {
-      // console.log("sender name :", senderName, userId, message, targetUserId);
-      try {
-        const uniqueRoomId = [userId, targetUserId].sort().join("$");
-        let chat = await Chat.findOne({
-          participants: { $all: [userId, targetUserId] },
-        });
-        if (!chat) {
-          chat = new Chat({
-            participants: [userId, targetUserId],
-            messages: [],
-          });
-        }
-        chat.messages.push({ message, senderId: userId });
-
-        await chat.save();
-
-        io.to(uniqueRoomId).emit("messageRecieved", {
-          message,
-          senderId: userId,
-          senderName,
-        });
-      } catch (error) {
-        console.log(error);
-      }
-    }
-  );
-  socket.on("disconnect", () => {});
-});
 connectToDb()
   .then(() => {
     const port = process.env.PORT;
