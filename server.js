@@ -39,7 +39,7 @@ app.use("/api/v1/send", requestRouter);
 app.use("/api/v1/chat", chatRouter);
 
 app.get("/", (req, res) => {
-  res.send("Hello, World!");
+  res.send("app is healthy!");
 });
 
 const server = http.createServer(app);
