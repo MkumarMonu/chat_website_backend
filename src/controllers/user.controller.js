@@ -16,7 +16,9 @@ const registerUser = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Email already exists" });
     }
-    await User.create(req?.body);
+    const user = await User.create(req?.body);
+    const token = user.generateToken();
+    res.cookie("userToken", token, cookieOption);
     return res
       .status(201)
       .json({ success: true, message: "User created successfully" });
@@ -179,6 +181,7 @@ const getYourConnections = async (req, res) => {
       })
       .populate({ path: "fromUser", select: "username email" })
       .populate({ path: "toUser", select: "username email" });
+
     const data = getConnections.map((row) => {
       if (row.fromUser?._id.toString() === loggedInUserId.toString()) {
         return row?.toUser;

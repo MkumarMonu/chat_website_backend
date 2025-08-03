@@ -12,13 +12,6 @@ import { chatRouter } from "./src/routes/chat.route.js";
 dotenv.config();
 const app = express();
 
-// app.use(
-//   cors({
-//     origin: "http://localhost:5173",
-//     origin:"https://chat-website-mv79.vercel.app/",
-//     credentials: true,
-//   })
-// );
 const allowedOrigins = [
   "http://localhost:5173",
   "https://chat-website-mv79.vercel.app",
